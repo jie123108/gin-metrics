@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/penglongli/gin-metrics/bloom"
+	"github.com/jie123108/gin-metrics/bloom"
 )
 
 var (
@@ -88,7 +88,7 @@ func (m *Monitor) initGinMetrics() {
 		Type:        Histogram,
 		Name:        metricRequestDuration,
 		Description: "the time server took to handle the request.",
-		Labels:      []string{"uri"},
+		Labels:      []string{"uri", "method"},
 		Buckets:     m.reqDuration,
 	})
 	_ = monitor.AddMetric(&Metric{
@@ -143,7 +143,7 @@ func (m *Monitor) ginMetricHandle(ctx *gin.Context, start time.Time) {
 	}
 
 	// set request duration
-	_ = m.GetMetric(metricRequestDuration).Observe([]string{ctx.FullPath()}, latency.Seconds())
+	_ = m.GetMetric(metricRequestDuration).Observe([]string{ctx.FullPath(), r.Method}, latency.Seconds())
 
 	// set response size
 	if w.Size() > 0 {

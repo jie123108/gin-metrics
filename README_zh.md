@@ -21,7 +21,7 @@ gin-gonic/gin metrics exporter for Prometheus.
 ## Installation
 
 ```bash
-$ go get github.com/penglongli/gin-metrics
+$ go get github.com/jie123108/gin-metrics
 ```
 
 ## Usage
@@ -34,7 +34,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	
-	"github.com/penglongli/gin-metrics/ginmetrics"
+	"github.com/jie123108/gin-metrics/ginmetrics"
 )
 
 func main() {
@@ -120,6 +120,6 @@ _ = ginmetrics.GetMonitor().GetMetric("example_gauge_metric").Add([]string{"labe
 
 ## Contributing
 
-如果有遇见什么问题，或者需要修改，可以  [新建 ISSUE](https://github.com/penglongli/gin-metrics/issues/new) 
-或者 [新建 PullRequest](https://github.com/penglongli/gin-metrics/pulls). 
+如果有遇见什么问题，或者需要修改，可以  [新建 ISSUE](https://github.com/jie123108/gin-metrics/issues/new) 
+或者 [新建 PullRequest](https://github.com/jie123108/gin-metrics/pulls). 
 
