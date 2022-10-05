@@ -70,7 +70,7 @@ func (m *Monitor) initGinMetrics() {
 		Type:        Counter,
 		Name:        metricURIRequestTotal,
 		Description: "all the server received request num with every uri.",
-		Labels:      []string{"uri", "method", "code"},
+		Labels:      []string{"uri", "code"},
 	})
 	_ = monitor.AddMetric(&Metric{
 		Type:        Counter,
@@ -88,14 +88,14 @@ func (m *Monitor) initGinMetrics() {
 		Type:        Histogram,
 		Name:        metricRequestDuration,
 		Description: "the time server took to handle the request.",
-		Labels:      []string{"uri", "method"},
+		Labels:      []string{"uri"},
 		Buckets:     m.reqDuration,
 	})
 	_ = monitor.AddMetric(&Metric{
 		Type:        Counter,
 		Name:        metricSlowRequest,
 		Description: fmt.Sprintf("the server handled slow requests counter, t=%d.", m.slowTime),
-		Labels:      []string{"uri", "method", "code"},
+		Labels:      []string{"uri", "code"},
 	})
 }
 
@@ -127,8 +127,9 @@ func (m *Monitor) ginMetricHandle(ctx *gin.Context, start time.Time) {
 		_ = m.GetMetric(metricRequestUVTotal).Inc(nil)
 	}
 
+	methodUri := r.Method + ":" + ctx.FullPath()
 	// set uri request total
-	_ = m.GetMetric(metricURIRequestTotal).Inc([]string{ctx.FullPath(), r.Method, strconv.Itoa(w.Status())})
+	_ = m.GetMetric(metricURIRequestTotal).Inc([]string{methodUri, strconv.Itoa(w.Status())})
 
 	// set request body size
 	// since r.ContentLength can be negative (in some occasions) guard the operation
@@ -139,11 +140,11 @@ func (m *Monitor) ginMetricHandle(ctx *gin.Context, start time.Time) {
 	// set slow request
 	latency := time.Since(start)
 	if int32(latency.Seconds()) > m.slowTime {
-		_ = m.GetMetric(metricSlowRequest).Inc([]string{ctx.FullPath(), r.Method, strconv.Itoa(w.Status())})
+		_ = m.GetMetric(metricSlowRequest).Inc([]string{methodUri, strconv.Itoa(w.Status())})
 	}
 
 	// set request duration
-	_ = m.GetMetric(metricRequestDuration).Observe([]string{ctx.FullPath(), r.Method}, latency.Seconds())
+	_ = m.GetMetric(metricRequestDuration).Observe([]string{methodUri}, latency.Seconds())
 
 	// set response size
 	if w.Size() > 0 {
