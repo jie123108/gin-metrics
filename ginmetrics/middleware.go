@@ -101,7 +101,9 @@ func (m *Monitor) initGinMetrics() {
 
 // monitorInterceptor as gin monitor middleware.
 func (m *Monitor) monitorInterceptor(ctx *gin.Context) {
-	if ctx.Request.URL.Path == m.metricPath {
+	path := ctx.Request.URL.Path
+	method := ctx.Request.Method
+	if m.IsIgnorePath(path, method) {
 		ctx.Next()
 		return
 	}

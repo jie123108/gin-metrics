@@ -1,6 +1,8 @@
 package ginmetrics
 
 import (
+	"fmt"
+
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -36,6 +38,7 @@ type Monitor struct {
 	metricPath  string
 	reqDuration []float64
 	metrics     map[string]*Metric
+	ignorePath  map[string]bool
 }
 
 // GetMonitor used to get global Monitor object,
@@ -47,6 +50,7 @@ func GetMonitor() *Monitor {
 			slowTime:    defaultSlowTime,
 			reqDuration: defaultDuration,
 			metrics:     make(map[string]*Metric),
+			ignorePath:  make(map[string]bool),
 		}
 	}
 	return monitor
@@ -64,6 +68,31 @@ func (m *Monitor) GetMetric(name string) *Metric {
 // to get gin server monitoring data.
 func (m *Monitor) SetMetricPath(path string) {
 	m.metricPath = path
+	m.ignorePath[path] = true
+}
+
+// AddIgnorePath Add a path to ignore list
+func (m *Monitor) AddIgnorePath(path string, method string) {
+	key := path
+	if method != "" {
+		key = fmt.Sprintf("%s:%s", method, path)
+	}
+	m.ignorePath[key] = true
+}
+
+func (m *Monitor) IsIgnorePath(path string, method string) (ignore bool) {
+	_, exist := m.ignorePath[path]
+	if exist {
+		ignore = true
+		return
+	}
+	methodPath := fmt.Sprintf("%s:%s", method, path)
+	_, exist = m.ignorePath[methodPath]
+	if exist {
+		ignore = true
+		return
+	}
+	return
 }
 
 // SetSlowTime set slowTime property. slowTime is used to determine whether
